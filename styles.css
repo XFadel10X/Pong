@@ -1,75 +1,75 @@
-/* styles.css */
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
   margin: 0;
-  background-color: #6d6b6b;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #5a5555;
+  color: white;
 }
 
-#start-screen,
-#end-screen {
-  text-align: center;
-  color: #fff;
+#start-screen, #end-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
 #pong-game {
   position: relative;
-  width: 800px;
-  height: 400px;
-  background-color: #fff;
+  width: 100vw;
+  height: 100vh;
 }
 
-.paddle {
+#paddle1, #paddle2, #ball {
   position: absolute;
+  background-color: white;
+}
+
+#paddle1, #paddle2 {
   width: 10px;
-  height: 100px;
-  background-color: #000;
+  height: 80px;
 }
 
 #paddle1 {
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 20px;
 }
 
 #paddle2 {
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 20px;
 }
 
 #ball {
-  position: absolute;
   width: 20px;
   height: 20px;
-  background-color: #ffe100;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  background-color: gold;
 }
 
-.player-info {
+.score {
   position: absolute;
   top: 10px;
   font-size: 24px;
-  font-family: Arial, sans-serif;
-  color: #000;
-  text-align: center;
 }
 
-#player1-info {
-  left: 50px;
+#score1 {
+  left: 20px;
 }
 
-#player2-info {
-  right: 50px;
+#score2 {
+  right: 20px;
 }
 
-.player-name {
+#player1-display-name, #player2-display-name {
+  position: absolute;
+  top: 40px;
   font-size: 18px;
+}
+
+#player1-display-name {
+  left: 20px;
+}
+
+#player2-display-name {
+  right: 20px;
 }
 
 #timer {
@@ -78,6 +78,72 @@ body {
   left: 50%;
   transform: translateX(-50%);
   font-size: 24px;
-  font-family: Arial, sans-serif;
-  color: #000;
+}
+
+#countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: white;
+}
+
+#fps-display {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  color: yellow;
+}
+
+#touch-controls {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.touch-control {
+  width: 20%;
+  height: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  pointer-events: auto;
+}
+
+#touch-up1 {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+#touch-down1 {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+#touch-up2 {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+#touch-down2 {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+#end-screen {
+  display: none;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 18px;
 }
