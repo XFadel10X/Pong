@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong </title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/Icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/Icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/Icons/favicon-16x16.png">
+<link rel="manifest" href="/Icons/site.webmanifest">
+<link rel="mask-icon" href="/Icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="/onescreen/styles.css">
+</head>
+<body>
+    <div id="start-screen">
+        <h1>Choisissez Vos Pseudo et la couleur de vos Raquettes</h1>
+        <form id="start-form">
+            <input type="text" id="player1-name" placeholder="Pseudo joueur 1" required>
+            <input type="color" id="player1-color" value="#ff0000">
+            <br>
+            <input type="text" id="player2-name" placeholder="Pseudo joueur 2" required>
+            <input type="color" id="player2-color" value="#0000ff">
+            <br>
+            <button type="submit">Démarrer le jeu</button>
+        </form>
+    </div>
+
+    <div id="pong-game">
+        <div id="paddle1"></div>
+        <div id="paddle2"></div>
+        <div id="ball"></div>
+        <div id="score1" class="score"></div>
+        <div id="score2" class="score"></div>
+        <div id="player1-display-name"></div>
+        <div id="player2-display-name"></div>
+        <div id="timer"></div>
+        <div id="countdown" class="countdown"></div>
+        <div id="fps-display"></div>
+        <div id="touch-controls">
+            <div id="touch-up1" class="touch-control"></div>
+            <div id="touch-down1" class="touch-control"></div>
+            <div id="touch-up2" class="touch-control"></div>
+            <div id="touch-down2" class="touch-control"></div>
+        </div>
+    </div>
+
+    <div id="end-screen">
+        <h1 id="winner-message"></h1>
+        <button id="restart-button">Rejouer</button>
+    </div>
+
+    <script src="/onescreen/script.js"></script>
+</body>
+</html>
