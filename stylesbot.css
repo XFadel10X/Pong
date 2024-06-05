@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+}
+
+.game-container {
+  position: relative;
+  width: 800px;
+  height: 400px;
+  border: 2px solid black;
+}
+
+.paddle {
+  position: absolute;
+  width: 20px;
+  height: 100px;
+  background-color: black;
+}
+
+#player {
+  left: 10px;
+}
+
+#ai {
+  right: 10px;
+}
+
+.ball {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+}
