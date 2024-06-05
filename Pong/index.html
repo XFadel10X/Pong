@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <link rel="stylesheet" href="/Pong/styles.css">
+</head>
+<body>
+    <div id="start-screen">
+        <h1>Configuration du jeu</h1>
+        <form id="start-form">
+            <input type="text" id="player1-name" placeholder="Pseudo joueur 1" required>
+            <input type="color" id="player1-color" value="#ff0000">
+            <br>
+            <input type="text" id="player2-name" placeholder="Pseudo joueur 2" required>
+            <input type="color" id="player2-color" value="#0000ff">
+            <br>
+            <button type="submit">Démarrer le jeu</button>
+        </form>
+    </div>
+
+    <div id="pong-game">
+        <div id="paddle1"></div>
+        <div id="paddle2"></div>
+        <div id="ball"></div>
+        <div id="score1" class="score"></div>
+        <div id="score2" class="score"></div>
+        <div id="player1-display-name"></div>
+        <div id="player2-display-name"></div>
+        <div id="timer"></div>
+        <div id="countdown" class="countdown"></div>
+        <div id="fps-display"></div>
+    </div>
+
+    <div id="end-screen">
+        <h1 id="winner-message"></h1>
+        <button id="restart-button">Rejouer</button>
+    </div>
+
+    <script src="/Pong/script.js"></script>
+</body>
+</html>
