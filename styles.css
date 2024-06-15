@@ -1,4 +1,16 @@
+html, body {
+
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+
 .myButton {
+
 	box-shadow: 0px 1px 0px 0px #fff6af;
 	background:linear-gradient(to bottom, #ffec64 5%, #de9d33 100%);
 	background-color:#ffec64;
