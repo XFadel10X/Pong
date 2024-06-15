@@ -4,6 +4,8 @@ const aiPaddle = document.getElementById('ai');
 const ball = document.querySelector('.ball');
 const score1Display = document.getElementById('score1');
 const score2Display = document.getElementById('score2');
+const timerDisplay = document.getElementById('timer');
+const winnerDisplay = document.getElementById('winner');
 
 // Variables de configuration
 const paddleSpeed = 10; // Vitesse des raquettes
@@ -11,7 +13,7 @@ const ballSpeedX = 8; // Vitesse horizontale de la balle
 const ballSpeedY = 8; // Vitesse verticale de la balle
 const aiReactiveness = 0.2; // Réactivité de l'IA (plus faible pour des mouvements plus humains)
 const maxAIPaddleSpeed = 6; // Vitesse maximale de déplacement de l'IA
-const gameContainerHeight = 400; // Hauteur du conteneur de jeu
+const gameDuration = 90; // Durée du jeu en secondes
 
 // Variables de jeu
 let ballX = 400;
@@ -20,15 +22,15 @@ let ballDirectionX = Math.random() < 0.5 ? 1 : -1;
 let ballDirectionY = Math.random() < 0.5 ? 1 : -1;
 let score1 = 0;
 let score2 = 0;
+let gameStartTime = Date.now();
+let gameOver = false;
 
 // Fonction pour déplacer la raquette du joueur en fonction de la souris ou du toucher
 function movePlayerPaddle(e) {
+    e.preventDefault(); // Empêche le défilement par défaut sur mobile
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    let newTop = clientY - playerPaddle.clientHeight / 2;
-    
-    // Limiter la raquette du joueur à l'intérieur du conteneur de jeu
-    newTop = Math.max(0, Math.min(newTop, gameContainerHeight - playerPaddle.clientHeight));
-    playerPaddle.style.top = `${newTop}px`;
+    const newTop = clientY - playerPaddle.clientHeight / 2;
+    playerPaddle.style.top = `${Math.max(0, Math.min(newTop, 400 - playerPaddle.clientHeight))}px`;
 }
 
 // Fonction pour déplacer la raquette de l'IA de manière plus humaine
@@ -39,11 +41,7 @@ function moveAIPaddle() {
 
     // Déplacement de l'IA avec une réactivité et une vitesse maximale
     const moveAmount = aiReactiveness * distance;
-    let newTop = aiPaddleTop + Math.sign(moveAmount) * Math.min(maxAIPaddleSpeed, Math.abs(moveAmount));
-    
-    // Limiter la raquette de l'IA à l'intérieur du conteneur de jeu
-    newTop = Math.max(0, Math.min(newTop, gameContainerHeight - aiPaddle.clientHeight));
-    aiPaddle.style.top = `${newTop}px`;
+    aiPaddle.style.top = `${aiPaddleTop + Math.sign(moveAmount) * Math.min(maxAIPaddleSpeed, Math.abs(moveAmount))}px`;
 }
 
 // Fonction pour déplacer la balle et gérer les collisions
@@ -52,7 +50,7 @@ function moveBall() {
     ballY += ballSpeedY * ballDirectionY;
 
     // Gestion des rebonds en haut et en bas
-    if (ballY >= gameContainerHeight - ball.clientHeight || ballY <= 0) {
+    if (ballY >= 380 || ballY <= 0) {
         ballDirectionY *= -1;
     }
 
@@ -91,17 +89,52 @@ function updateScore() {
 
 // Fonction pour gérer la logique de jeu à chaque frame
 function gameLoop() {
+    if (gameOver) return;
+
     moveAIPaddle();
     moveBall();
-    requestAnimationFrame(gameLoop);
+
+    const elapsedTime = Math.floor((Date.now() - gameStartTime) / 1000);
+    const timeLeft = gameDuration - elapsedTime;
+    timerDisplay.textContent = formatTime(timeLeft);
+
+    if (timeLeft <= 0) {
+        endGame();
+    } else {
+        requestAnimationFrame(gameLoop);
+    }
 }
 
-// Initialisation de l'écouteur d'événement pour le mouvement de la raquette du joueur
-document.addEventListener('mousemove', movePlayerPaddle);
-document.addEventListener('touchmove', movePlayerPaddle);
+// Fonction pour formater le temps en minutes et secondes
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+}
 
-// Démarrage de la boucle de jeu
+// Fonction pour terminer le jeu
+function endGame() {
+    gameOver = true;
+    if (score1 > score2) {
+        winnerDisplay.textContent = 'Humain à Gagnée!';
+    } else if (score2 > score1) {
+        winnerDisplay.textContent = 'IA à gagnée';
+    } else {
+        winnerDisplay.textContent = 'égalitée';
+    }
+    winnerDisplay.style.display = 'block';
+}
+
+// Fonction pour initialiser les écouteurs d'événements
+function initEventListeners() {
+    document.addEventListener('mousemove', movePlayerPaddle);
+    document.addEventListener('touchstart', movePlayerPaddle);
+    document.addEventListener('touchmove', movePlayerPaddle);
+    aiPaddle.addEventListener('click', () => {
+        window.location.href = 'https://chat-jai-pete.fr/'; // Remplacer par le lien du live
+    });
+}
+
+// Démarrage de la boucle de jeu et initialisation des écouteurs d'événements
+initEventListeners();
 gameLoop();
-function goToLive() {
-    window.location.href = "https://chat-jai-pete.fr/";
-}

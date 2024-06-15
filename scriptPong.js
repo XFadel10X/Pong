@@ -38,7 +38,6 @@ const winnerMessage = document.getElementById('winner-message');
 const restartButton = document.getElementById('restart-button');
 
 // Chargement des sons
-const hitSound = new Audio('hit.wav');
 
 // Gestionnaire d'événement pour démarrer le jeu
 startForm.addEventListener('submit', startGame);
@@ -51,15 +50,9 @@ document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
 
 // Gestionnaire d'événement pour les contrôles tactiles
-document.getElementById('touch-up1').addEventListener('touchstart', () => paddle1Direction = -paddleSpeed);
-document.getElementById('touch-up1').addEventListener('touchend', () => paddle1Direction = 0);
-document.getElementById('touch-down1').addEventListener('touchstart', () => paddle1Direction = paddleSpeed);
-document.getElementById('touch-down1').addEventListener('touchend', () => paddle1Direction = 0);
+// Gestionnaire d'événement pour les contrôles tactiles
+// Gestionnaire d'événement pour les contrôles tactiles
 
-document.getElementById('touch-up2').addEventListener('touchstart', () => paddle2Direction = -paddleSpeed);
-document.getElementById('touch-up2').addEventListener('touchend', () => paddle2Direction = 0);
-document.getElementById('touch-down2').addEventListener('touchstart', () => paddle2Direction = paddleSpeed);
-document.getElementById('touch-down2').addEventListener('touchend', () => paddle2Direction = 0);
 // Fonction pour détecter les touches enfoncées
 function keyDownHandler(e) {
     if (e.key === 'z') {
@@ -245,3 +238,13 @@ function updateFps(deltaTime) {
     fps = 1 / deltaTime;
     fpsDisplay.textContent = `FPS: ${Math.round(fps)}`;
 }
+function disableScrollDown() {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 0) {
+            window.scrollTo(0, 0); // Remettre le scroll en haut
+        }
+    });
+}
+
+// Appeler la fonction de désactivation du scroll
+disableScrollDown();

@@ -2,8 +2,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background-color: #222;
-  color: white;
+  background-color: #373333;
+  color: rgb(255, 255, 255);
 }
 
 #start-screen, #end-screen {
@@ -15,9 +15,24 @@ body {
 }
 
 #pong-game {
+  position: relative; /* Assure que les éléments enfants sont positionnés relativement à celui-ci */
+  width: 100%; /* Largeur de 100% pour remplir tout l'espace disponible */
+  height: 100vh; /* Hauteur de 100% de la hauteur visible de l'écran */
+  display: flex;
+  justify-content: center; /* Centre horizontalement */
+  align-items: center; /* Centre verticalement */
+  background-color: #373333; /* Couleur de fond de l'écran de jeu */
+  overflow: hidden; /* Empêche le défilement */
+}
+
+#pong-game canvas {
+  background-color: #453e3e; /* Couleur de fond du canvas (zone de jeu) */
+}
+#pong-game-container {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width: 100%; /* Ajustez la largeur selon vos besoins */
+  height: 100vh; /* Empêche le débordement en vertical */
+  overflow: hidden; /* Cache tout débordement */
 }
 
 #paddle1, #paddle2, #ball {
@@ -41,6 +56,7 @@ body {
 #ball {
   width: 20px;
   height: 20px;
+  background-color: rgb(255, 230, 0);
 }
 
 .score {
