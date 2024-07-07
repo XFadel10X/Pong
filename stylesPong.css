@@ -4,6 +4,7 @@ body {
   font-family: Arial, sans-serif;
   background-color: #373333;
   color: rgb(255, 255, 255);
+  font-family: Arial, sans-serif;
 }
 
 #start-screen, #end-screen {
@@ -120,4 +121,36 @@ button {
   margin-top: 20px;
   padding: 10px 20px;
   font-size: 18px;
+}
+.navbar {
+  position: fixed;
+  left: -200px;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  background-color: #333;
+  overflow-x: hidden;
+  transition: left 0.3s;
+  padding-top: 60px;
+}
+
+.navbar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.navbar ul li {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #555;
+}
+
+.navbar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+}
+
+.navbar ul li a:hover {
+  background-color: #575757;
 }
