@@ -10,7 +10,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-#counter {
+#personal-counter, #global-counter {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -19,6 +19,10 @@ body {
     color: #fff;
     padding: 10px;
     border-radius: 5px;
+}
+
+#global-counter {
+    top: 50px; /* Positionne le deuxième compteur en dessous du premier */
 }
 
 #clickable-image {

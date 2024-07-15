@@ -1,4 +1,4 @@
-// Déclaration des variables
+
 let paddle1Y, paddle2Y;
 let ballX, ballY;
 let ballSpeedX, ballSpeedY;
@@ -7,13 +7,13 @@ let gameInterval, timerInterval;
 let remainingTime;
 let player1Name, player2Name;
 let fps, lastFrameTime;
-const gameDuration = 60; // Durée du jeu en secondes
+const gameDuration = 60; 
 const paddleSpeed = 3;
-const speedIncrement = 1.05; // Facteur d'augmentation de la vitesse de la balle
+const speedIncrement = 1.05; 
 let paddle1Direction = 0;
 let paddle2Direction = 0;
 
-// Sélection des éléments HTML
+
 const startForm = document.getElementById('start-form');
 const player1NameInput = document.getElementById('player1-name');
 const player1ColorInput = document.getElementById('player1-color');
@@ -37,49 +37,39 @@ const endScreen = document.getElementById('end-screen');
 const winnerMessage = document.getElementById('winner-message');
 const restartButton = document.getElementById('restart-button');
 
-// Chargement des sons
-
-// Gestionnaire d'événement pour démarrer le jeu
 startForm.addEventListener('submit', startGame);
 
-// Gestionnaire d'événement pour redémarrer le jeu
 restartButton.addEventListener('click', restartGame);
 
-// Gestionnaire d'événement pour les touches du clavier
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
 
-// Gestionnaire d'événement pour les contrôles tactiles
-// Gestionnaire d'événement pour les contrôles tactiles
-// Gestionnaire d'événement pour les contrôles tactiles
-
-// Fonction pour détecter les touches enfoncées
 function keyDownHandler(e) {
     if (e.key === 'z') {
-        paddle1Direction = -paddleSpeed; // Haut
+        paddle1Direction = -paddleSpeed; 
     } else if (e.key === 's') {
-        paddle1Direction = paddleSpeed; // Bas
+        paddle1Direction = paddleSpeed; 
     } else if (e.key === 'ArrowUp') {
-        paddle2Direction = -paddleSpeed; // Haut
+        paddle2Direction = -paddleSpeed; 
     } else if (e.key === 'ArrowDown') {
-        paddle2Direction = paddleSpeed; // Bas
+        paddle2Direction = paddleSpeed; 
     }
 }
 
-// Fonction pour détecter les touches relâchées
+
 function keyUpHandler(e) {
     if (e.key === 'z' || e.key === 's') {
-        paddle1Direction = 0; // Arrêt
+        paddle1Direction = 0;
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        paddle2Direction = 0; // Arrêt
+        paddle2Direction = 0;
     }
 }
-// Fonction pour mettre à jour la position des paddles
+
 function movePaddles() {
     paddle1Y += paddle1Direction;
     paddle2Y += paddle2Direction;
 
-    // Empêcher les paddles de sortir de l'écran
+
     if (paddle1Y < 0) {
         paddle1Y = 0;
     } else if (paddle1Y > pongGame.clientHeight - paddle1.clientHeight) {
@@ -96,30 +86,30 @@ function movePaddles() {
     paddle2.style.top = paddle2Y + 'px';
 }
 
-// Fonction pour déplacer la balle
+
 function moveBall(deltaTime) {
     ballX += ballSpeedX * deltaTime * 60;
     ballY += ballSpeedY * deltaTime * 60;
 
-    // Détection des collisions avec les murs supérieur et inférieur
+   
     if (ballY < 0 || ballY > pongGame.clientHeight - ball.clientHeight) {
         ballSpeedY = -ballSpeedY;
     }
 
-    // Détection des collisions avec les paddles
+  
     if (ballX < paddle1.clientWidth + 20 && ballY > paddle1Y && ballY < paddle1Y + paddle1.clientHeight) {
         ballSpeedX = -ballSpeedX;
-        ballSpeedX *= speedIncrement; // Augmente la vitesse
-        ballSpeedY *= speedIncrement; // Augmente la vitesse
+        ballSpeedX *= speedIncrement; 
+        ballSpeedY *= speedIncrement;
         hitSound.play();
     } else if (ballX > pongGame.clientWidth - paddle2.clientWidth - 20 - ball.clientWidth && ballY > paddle2Y && ballY < paddle2Y + paddle2.clientHeight) {
         ballSpeedX = -ballSpeedX;
-        ballSpeedX *= speedIncrement; // Augmente la vitesse
-        ballSpeedY *= speedIncrement; // Augmente la vitesse
+        ballSpeedX *= speedIncrement; 
+        ballSpeedY *= speedIncrement;
         hitSound.play();
     }
 
-    // Détection des scores
+  
     if (ballX < 0) {
         score2++;
         resetBall();
@@ -133,7 +123,7 @@ function moveBall(deltaTime) {
     score1Display.textContent = score1;
     score2Display.textContent = score2;
 }
-// Fonction pour démarrer le jeu
+
 function startGame(e) {
     e.preventDefault();
     player1Name = player1NameInput.value;
@@ -145,10 +135,10 @@ function startGame(e) {
     startScreen.style.display = 'none';
     pongGame.style.display = 'block';
     countdownDisplay.style.display = 'block';
-    startCountdown(3); // Début du compte à rebours de 3 secondes
+    startCountdown(3); 
 }
 
-// Fonction pour démarrer le compte à rebours
+
 function startCountdown(duration) {
     let countdown = duration;
     const countdownInterval = setInterval(() => {
@@ -157,12 +147,12 @@ function startCountdown(duration) {
         if (countdown < 0) {
             clearInterval(countdownInterval);
             countdownDisplay.style.display = 'none';
-            startMatch(); // Commence le match après le compte à rebours
+            startMatch(); 
         }
     }, 1000);
 }
 
-// Fonction pour démarrer le match
+
 function startMatch() {
     paddle1Y = paddle2Y = (pongGame.clientHeight - paddle1.clientHeight) / 2;
     ballX = pongGame.clientWidth / 2;
@@ -175,11 +165,11 @@ function startMatch() {
     remainingTime = gameDuration;
     timerDisplay.textContent = `Temps restant: ${remainingTime}s`;
     lastFrameTime = performance.now();
-    gameInterval = setInterval(gameLoop, 1000 / 144); // Rendu à 144 FPS
+    gameInterval = setInterval(gameLoop, 1000 / 144);
     timerInterval = setInterval(updateTimer, 1000);
 }
 
-// Fonction pour mettre à jour le minuteur
+
 function updateTimer() {
     remainingTime--;
     timerDisplay.textContent = `Temps restant: ${remainingTime}s`;
@@ -188,7 +178,7 @@ function updateTimer() {
     }
 }
 
-// Fonction pour mettre fin au match
+
 function endMatch() {
     clearInterval(gameInterval);
     clearInterval(timerInterval);
@@ -203,13 +193,13 @@ function endMatch() {
     }
 }
 
-// Fonction pour redémarrer le jeu
+
 function restartGame() {
     endScreen.style.display = 'none';
     startScreen.style.display = 'flex';
 }
 
-// Fonction pour mettre à jour le jeu à chaque frame
+
 function gameLoop() {
     let deltaTime = (performance.now() - lastFrameTime) / 1000;
     lastFrameTime = performance.now();
@@ -220,20 +210,20 @@ function gameLoop() {
     updateFps(deltaTime);
 }
 
-// Fonction pour détecter les collisions de la balle
+
 function detectCollisions() {
-    // Ajouter la logique de détection des collisions
+    
 }
 
-// Fonction pour réinitialiser la balle
+
 function resetBall() {
     ballX = pongGame.clientWidth / 2;
     ballY = pongGame.clientHeight / 2;
-    ballSpeedX = Math.sign(ballSpeedX) * 4; // Réinitialise la vitesse de la balle
-    ballSpeedY = (Math.random() - 0.5) * 8; // Réinitialise la vitesse de la balle
+    ballSpeedX = Math.sign(ballSpeedX) * 4; 
+    ballSpeedY = (Math.random() - 0.5) * 8; 
 }
 
-// Fonction pour mettre à jour l'affichage des FPS
+
 function updateFps(deltaTime) {
     fps = 1 / deltaTime;
     fpsDisplay.textContent = `FPS: ${Math.round(fps)}`;
@@ -241,12 +231,12 @@ function updateFps(deltaTime) {
 function disableScrollDown() {
     window.addEventListener('scroll', () => {
         if (window.scrollY > 0) {
-            window.scrollTo(0, 0); // Remettre le scroll en haut
+            window.scrollTo(0, 0); 
         }
     });
 }
 
-// Appeler la fonction de désactivation du scroll
+
 disableScrollDown();
 document.addEventListener('mousemove', function(e) {
     const navbar = document.querySelector('.navbar');
