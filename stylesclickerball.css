@@ -15,14 +15,14 @@ body {
     top: 10px;
     right: 10px;
     font-size: 24px;
-    background-color: #333;
+    background-color: #424040;
     color: #fff;
     padding: 10px;
     border-radius: 5px;
 }
 
 #global-counter {
-    top: 50px; /* Positionne le deuxième compteur en dessous du premier */
+    top: 50px; 
 }
 
 #clickable-image {
