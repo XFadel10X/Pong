@@ -108,8 +108,8 @@ body {
 .mobile-controls {
   display: flex;
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 0px;
+  right: 650px;
   flex-direction: column;
 }
 
