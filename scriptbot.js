@@ -26,33 +26,33 @@ let gameStartTime = Date.now();
 let gameOver = false;
 
 let isDragging = false;
-let sliderStartX = 0;
+let sliderStartY = 0;
 
 // Événements de glissement tactile
 sliderThumb.addEventListener('touchstart', (e) => {
     isDragging = true;
-    sliderStartX = e.touches[0].clientX - sliderThumb.offsetLeft;
+    sliderStartY = e.touches[0].clientY - sliderThumb.offsetTop;
 });
 
 document.addEventListener('touchmove', (e) => {
     if (isDragging) {
         e.preventDefault(); // Empêche le défilement par défaut sur les appareils tactiles
-        let posX = e.touches[0].clientX - sliderStartX;
-        const sliderWidth = sliderLine.clientWidth - sliderThumb.clientWidth;
+        let posY = e.touches[0].clientY - sliderStartY;
+        const sliderHeight = sliderLine.clientHeight - sliderThumb.clientHeight;
 
-        if (posX < 0) {
-            posX = 0;
-        } else if (posX > sliderWidth) {
-            posX = sliderWidth;
+        if (posY < 0) {
+            posY = 0;
+        } else if (posY > sliderHeight) {
+            posY = sliderHeight;
         }
 
-        const percent = posX / sliderWidth;
-        const maxX = sliderLine.clientWidth - sliderThumb.clientWidth;
-        const newLeft = percent * maxX;
-        sliderThumb.style.left = `${newLeft}px`;
+        sliderThumb.style.top = `${posY}px`;
 
-        const paddleX = newLeft + sliderThumb.clientWidth / 2;
-        playerPaddle.style.left = `${paddleX}px`;
+        // Calcul de la nouvelle position du paddle en fonction de la position du slider
+        const percent = posY / sliderHeight;
+        const maxY = sliderLine.clientHeight - sliderThumb.clientHeight;
+        const newTop = percent * maxY;
+        playerPaddle.style.top = `${newTop}px`;
     }
 });
 
