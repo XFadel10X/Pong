@@ -131,7 +131,7 @@ function initEventListeners() {
     moveDownButton.addEventListener('click', movePlayerPaddleDown);
 
     aiPaddle.addEventListener('click', () => {
-        window.location.href = 'https://chat-jai-pete.fr/';
+        window.location.href = 'https://youtu.be/dQw4w9WgXcQ?si=lE-wZ2mWJHR3TIac';
     });
 }
 
