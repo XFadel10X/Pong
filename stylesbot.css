@@ -106,7 +106,7 @@ body {
 }
 
 .mobile-controls {
-  display: none;
+  display: flex;
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -121,10 +121,4 @@ body {
   color: white;
   border: none;
   border-radius: 5px;
-}
-
-@media (max-width: 768px) {
-  .mobile-controls {
-      display: flex;
-  }
 }
