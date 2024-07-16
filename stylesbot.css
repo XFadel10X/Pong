@@ -1,3 +1,4 @@
+/* stylesbot.css */
 body {
   margin: 0;
   height: 100vh;
@@ -14,14 +15,14 @@ body {
   max-width: 800px;
   height: 400px;
   border: 2px solid black;
-  overflow: hidden; 
+  overflow: hidden;
 }
 .paddle {
   position: absolute;
   width: 20px;
   height: 100px;
   background-color: black;
-  cursor: pointer; 
+  cursor: pointer;
 }
 
 #player {
@@ -69,7 +70,7 @@ body {
   transform: translate(-50%, -50%);
   font-size: 32px;
   color: red;
-  display: none; 
+  display: none;
 }
 .navbar {
   position: fixed;
@@ -102,4 +103,28 @@ body {
 
 .navbar ul li a:hover {
   background-color: #575757;
+}
+
+.mobile-controls {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  flex-direction: column;
+}
+
+.mobile-controls button {
+  font-size: 24px;
+  padding: 10px;
+  margin: 5px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+  .mobile-controls {
+      display: flex;
+  }
 }

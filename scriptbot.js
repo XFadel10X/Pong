@@ -1,4 +1,3 @@
-
 const playerPaddle = document.getElementById('player');
 const aiPaddle = document.getElementById('ai');
 const ball = document.querySelector('.ball');
@@ -6,15 +5,14 @@ const score1Display = document.getElementById('score1');
 const score2Display = document.getElementById('score2');
 const timerDisplay = document.getElementById('timer');
 const winnerDisplay = document.getElementById('winner');
+const moveUpButton = document.getElementById('move-up');
+const moveDownButton = document.getElementById('move-down');
 
-
-
-const ballSpeedX = 6.5; 
+const ballSpeedX = 6.5;
 const ballSpeedY = 6.5;
-const aiReactiveness = 0.3; 
-const maxAIPaddleSpeed = 6; 
-const gameDuration = 60; 
-
+const aiReactiveness = 0.25;
+const maxAIPaddleSpeed = 6;
+const gameDuration = 60;
 
 let ballX = 400;
 let ballY = 200;
@@ -25,7 +23,6 @@ let score2 = 0;
 let gameStartTime = Date.now();
 let gameOver = false;
 
-
 function movePlayerPaddle(e) {
     e.preventDefault();
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -33,27 +30,32 @@ function movePlayerPaddle(e) {
     playerPaddle.style.top = `${Math.max(0, Math.min(newTop, 400 - playerPaddle.clientHeight))}px`;
 }
 
+function movePlayerPaddleUp() {
+    const currentTop = parseInt(playerPaddle.style.top) || 0;
+    playerPaddle.style.top = `${Math.max(0, currentTop - 20)}px`;
+}
+
+function movePlayerPaddleDown() {
+    const currentTop = parseInt(playerPaddle.style.top) || 0;
+    playerPaddle.style.top = `${Math.min(400 - playerPaddle.clientHeight, currentTop + 20)}px`;
+}
 
 function moveAIPaddle() {
     const aiPaddleTop = parseInt(aiPaddle.style.top) || 0;
     const ballTop = ballY - ball.clientHeight / 2;
     const distance = ballTop - (aiPaddleTop + aiPaddle.clientHeight / 2);
 
-   
     const moveAmount = aiReactiveness * distance;
     aiPaddle.style.top = `${aiPaddleTop + Math.sign(moveAmount) * Math.min(maxAIPaddleSpeed, Math.abs(moveAmount))}px`;
 }
-
 
 function moveBall() {
     ballX += ballSpeedX * ballDirectionX;
     ballY += ballSpeedY * ballDirectionY;
 
-
     if (ballY >= 380 || ballY <= 0) {
         ballDirectionY *= -1;
     }
-
 
     if (ballX <= 40 && ballY >= parseInt(playerPaddle.style.top) && ballY <= parseInt(playerPaddle.style.top) + playerPaddle.clientHeight) {
         ballDirectionX *= -1;
@@ -68,14 +70,12 @@ function moveBall() {
     ball.style.top = `${ballY}px`;
 }
 
-
 function resetBall() {
     ballX = 400;
     ballY = 200;
     ballDirectionX = Math.random() < 0.5 ? 1 : -1;
     ballDirectionY = Math.random() < 0.5 ? 1 : -1;
 }
-
 
 function updateScore() {
     if (ballX <= 0) {
@@ -86,7 +86,6 @@ function updateScore() {
         score1Display.textContent = score1;
     }
 }
-
 
 function gameLoop() {
     if (gameOver) return;
@@ -105,39 +104,47 @@ function gameLoop() {
     }
 }
 
-
 function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-
 function endGame() {
     gameOver = true;
     if (score1 > score2) {
-        winnerDisplay.textContent = 'Humain à Gagnée!';
+        winnerDisplay.textContent = "L'Humain à Gagné !";
     } else if (score2 > score1) {
-        winnerDisplay.textContent = 'IA à gagnée';
+        winnerDisplay.textContent = "L'IA à gagnée !";
     } else {
-        winnerDisplay.textContent = 'égalitée';
+        winnerDisplay.textContent = 'Égalité';
     }
     winnerDisplay.style.display = 'block';
 }
-
 
 function initEventListeners() {
     document.addEventListener('mousemove', movePlayerPaddle);
     document.addEventListener('touchstart', movePlayerPaddle);
     document.addEventListener('touchmove', movePlayerPaddle);
+
+    moveUpButton.addEventListener('click', movePlayerPaddleUp);
+    moveDownButton.addEventListener('click', movePlayerPaddleDown);
+
     aiPaddle.addEventListener('click', () => {
         window.location.href = 'https://chat-jai-pete.fr/';
     });
 }
 
+function initializeGame() {
+    playerPaddle.style.top = '150px';
+    aiPaddle.style.top = '150px';
+    resetBall();
+}
 
+initializeGame();
 initEventListeners();
 gameLoop();
+
 document.addEventListener('mousemove', function(e) {
     const navbar = document.querySelector('.navbar');
     if (e.clientX < 200) {

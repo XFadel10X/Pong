@@ -6,18 +6,17 @@
     <title>Pong 1v1 (PvB)</title>
     <link rel="stylesheet" href="stylesbot.css">
     <link rel="apple-touch-icon" sizes="180x180" href="Icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="Icons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="Icons/favicon-16x16.png">
-<link rel="manifest" href="Icons/site.webmanifest">
-<link rel="mask-icon" href="Icons/safari-pinned-tab.svg" color="#5bbad5">
-<meta name="msapplication-TileColor" content="#da532c">
-<meta name="theme-color" content="#ffffff">
-</head>
+    <link rel="icon" type="image/png" sizes="32x32" href="Icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="Icons/favicon-16x16.png">
+    <link rel="manifest" href="Icons/site.webmanifest">
+    <link rel="mask-icon" href="Icons/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
 </head>
 <body>
     <div class="game-container">
         <div class="paddle" id="player"></div>
-        <div class="paddle" id="ai" onclick="goToLive()"></div>
+        <div class="paddle" id="ai"></div>
         <div class="ball"></div>
         <div id="score1" class="score">0</div>
         <div id="score2" class="score">0</div>
@@ -31,6 +30,10 @@
             <li><a href="pongbot.html">Pong Bot</a></li>
             <li><a href="clickerball.html">Clicker Ball</a></li>
         </ul>
+    </div>
+    <div class="mobile-controls">
+        <button id="move-up">⬆️</button>
+        <button id="move-down">⬇️</button>
     </div>
     <script src="scriptbot.js"></script>
 </body>

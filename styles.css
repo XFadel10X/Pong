@@ -5,7 +5,7 @@ body {
 
 .navbar {
     position: fixed;
-    left: -200px;
+    left: 0px;
     top: 0;
     width: 200px;
     height: 100%;

@@ -75,7 +75,6 @@ function disableScrollDown() {
     });
 }
 
-
 disableScrollDown();
 document.addEventListener('mousemove', function(e) {
     const navbar = document.querySelector('.navbar');
