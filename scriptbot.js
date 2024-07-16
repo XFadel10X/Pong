@@ -1,3 +1,5 @@
+// scriptbot.js
+
 const playerPaddle = document.getElementById('player');
 const aiPaddle = document.getElementById('ai');
 const ball = document.querySelector('.ball');
@@ -5,8 +7,8 @@ const score1Display = document.getElementById('score1');
 const score2Display = document.getElementById('score2');
 const timerDisplay = document.getElementById('timer');
 const winnerDisplay = document.getElementById('winner');
-const moveUpButton = document.getElementById('move-up');
-const moveDownButton = document.getElementById('move-down');
+const sliderThumb = document.getElementById('slider-thumb');
+const sliderLine = document.getElementById('slider-line');
 
 const ballSpeedX = 6.5;
 const ballSpeedY = 6.5;
@@ -23,22 +25,40 @@ let score2 = 0;
 let gameStartTime = Date.now();
 let gameOver = false;
 
-function movePlayerPaddle(e) {
-    e.preventDefault();
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const newTop = clientY - playerPaddle.clientHeight / 2;
-    playerPaddle.style.top = `${Math.max(0, Math.min(newTop, 400 - playerPaddle.clientHeight))}px`;
-}
+let isDragging = false;
+let sliderStartX = 0;
 
-function movePlayerPaddleUp() {
-    const currentTop = parseInt(playerPaddle.style.top) || 0;
-    playerPaddle.style.top = `${Math.max(0, currentTop - 20)}px`;
-}
+// Événements de glissement tactile
+sliderThumb.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    sliderStartX = e.touches[0].clientX - sliderThumb.offsetLeft;
+});
 
-function movePlayerPaddleDown() {
-    const currentTop = parseInt(playerPaddle.style.top) || 0;
-    playerPaddle.style.top = `${Math.min(400 - playerPaddle.clientHeight, currentTop + 20)}px`;
-}
+document.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+        e.preventDefault(); // Empêche le défilement par défaut sur les appareils tactiles
+        let posX = e.touches[0].clientX - sliderStartX;
+        const sliderWidth = sliderLine.clientWidth - sliderThumb.clientWidth;
+
+        if (posX < 0) {
+            posX = 0;
+        } else if (posX > sliderWidth) {
+            posX = sliderWidth;
+        }
+
+        const percent = posX / sliderWidth;
+        const maxX = sliderLine.clientWidth - sliderThumb.clientWidth;
+        const newLeft = percent * maxX;
+        sliderThumb.style.left = `${newLeft}px`;
+
+        const paddleX = newLeft + sliderThumb.clientWidth / 2;
+        playerPaddle.style.left = `${paddleX}px`;
+    }
+});
+
+document.addEventListener('touchend', () => {
+    isDragging = false;
+});
 
 function moveAIPaddle() {
     const aiPaddleTop = parseInt(aiPaddle.style.top) || 0;
@@ -113,9 +133,9 @@ function formatTime(seconds) {
 function endGame() {
     gameOver = true;
     if (score1 > score2) {
-        winnerDisplay.textContent = "L'Humain à Gagné !";
+        winnerDisplay.textContent = "L'Humain a Gagné !";
     } else if (score2 > score1) {
-        winnerDisplay.textContent = "L'IA à gagnée !";
+        winnerDisplay.textContent = "L'IA a Gagné !";
     } else {
         winnerDisplay.textContent = 'Égalité';
     }
@@ -123,15 +143,8 @@ function endGame() {
 }
 
 function initEventListeners() {
-    document.addEventListener('mousemove', movePlayerPaddle);
-    document.addEventListener('touchstart', movePlayerPaddle);
-    document.addEventListener('touchmove', movePlayerPaddle);
-
-    moveUpButton.addEventListener('click', movePlayerPaddleUp);
-    moveDownButton.addEventListener('click', movePlayerPaddleDown);
-
     aiPaddle.addEventListener('click', () => {
-        window.location.href = 'https://youtu.be/dQw4w9WgXcQ?si=lE-wZ2mWJHR3TIac';
+        window.location.href = 'https://chat-jai-pete.fr/';
     });
 }
 
