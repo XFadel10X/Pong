@@ -60,6 +60,37 @@ document.addEventListener('touchend', () => {
     isDragging = false;
 });
 
+// Événements de glissement pour les ordinateurs
+sliderThumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    sliderStartX = e.clientX - sliderThumb.offsetLeft;
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        let posX = e.clientX - sliderStartX;
+        const sliderWidth = sliderLine.clientWidth - sliderThumb.clientWidth;
+
+        if (posX < 0) {
+            posX = 0;
+        } else if (posX > sliderWidth) {
+            posX = sliderWidth;
+        }
+
+        sliderThumb.style.left = `${posX}px`;
+
+        // Calcul de la nouvelle position du paddle en fonction de la position du slider
+        const percent = posX / sliderWidth;
+        const maxY = gameContainer.clientHeight - playerPaddle.clientHeight;
+        const newTop = percent * maxY;
+        playerPaddle.style.top = `${newTop}px`;
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
 function moveAIPaddle() {
     const aiPaddleTop = parseInt(aiPaddle.style.top) || 0;
     const ballTop = ballY - ball.clientHeight / 2;
