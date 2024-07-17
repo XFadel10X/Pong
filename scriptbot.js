@@ -1,5 +1,3 @@
-// scriptbot.js
-
 const playerPaddle = document.getElementById('player');
 const aiPaddle = document.getElementById('ai');
 const ball = document.querySelector('.ball');
@@ -7,8 +5,9 @@ const score1Display = document.getElementById('score1');
 const score2Display = document.getElementById('score2');
 const timerDisplay = document.getElementById('timer');
 const winnerDisplay = document.getElementById('winner');
-const sliderThumb = document.getElementById('slider-thumb');
-const sliderLine = document.getElementById('slider-line');
+const paddleSliderMobile = document.getElementById('paddle-slider-mobile');
+const paddleSliderDesktop = document.getElementById('paddle-slider-desktop');
+const gameContainer = document.querySelector('.game-container');
 
 const ballSpeedX = 6.5;
 const ballSpeedY = 6.5;
@@ -25,70 +24,20 @@ let score2 = 0;
 let gameStartTime = Date.now();
 let gameOver = false;
 
-let isDragging = false;
-let sliderStartX = 0;
-
-// Événements de glissement tactile
-sliderThumb.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    sliderStartX = e.touches[0].clientX - sliderThumb.offsetLeft;
+// Événement pour le slider sur mobile
+paddleSliderMobile.addEventListener('input', (e) => {
+    const sliderValue = e.target.value;
+    const maxY = gameContainer.clientHeight - playerPaddle.clientHeight;
+    const newTop = (sliderValue / 100) * maxY;
+    playerPaddle.style.top = `${newTop}px`;
 });
 
-document.addEventListener('touchmove', (e) => {
-    if (isDragging) {
-        e.preventDefault(); // Empêche le défilement par défaut sur les appareils tactiles
-        let posX = e.touches[0].clientX - sliderStartX;
-        const sliderWidth = sliderLine.clientWidth - sliderThumb.clientWidth;
-
-        if (posX < 0) {
-            posX = 0;
-        } else if (posX > sliderWidth) {
-            posX = sliderWidth;
-        }
-
-        sliderThumb.style.left = `${posX}px`;
-
-        // Calcul de la nouvelle position du paddle en fonction de la position du slider
-        const percent = posX / sliderWidth;
-        const maxY = gameContainer.clientHeight - playerPaddle.clientHeight;
-        const newTop = percent * maxY;
-        playerPaddle.style.top = `${newTop}px`;
+// Contrôle du paddle avec la souris sur ordinateur
+gameContainer.addEventListener('mousemove', function(e) {
+    if (e.clientY >= 0 && e.clientY <= gameContainer.clientHeight) {
+        const newTop = e.clientY - playerPaddle.clientHeight / 2;
+        playerPaddle.style.top = `${Math.max(0, Math.min(newTop, gameContainer.clientHeight - playerPaddle.clientHeight))}px`;
     }
-});
-
-document.addEventListener('touchend', () => {
-    isDragging = false;
-});
-
-// Événements de glissement pour les ordinateurs
-sliderThumb.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    sliderStartX = e.clientX - sliderThumb.offsetLeft;
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-        let posX = e.clientX - sliderStartX;
-        const sliderWidth = sliderLine.clientWidth - sliderThumb.clientWidth;
-
-        if (posX < 0) {
-            posX = 0;
-        } else if (posX > sliderWidth) {
-            posX = sliderWidth;
-        }
-
-        sliderThumb.style.left = `${posX}px`;
-
-        // Calcul de la nouvelle position du paddle en fonction de la position du slider
-        const percent = posX / sliderWidth;
-        const maxY = gameContainer.clientHeight - playerPaddle.clientHeight;
-        const newTop = percent * maxY;
-        playerPaddle.style.top = `${newTop}px`;
-    }
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
 });
 
 function moveAIPaddle() {
@@ -164,19 +113,13 @@ function formatTime(seconds) {
 function endGame() {
     gameOver = true;
     if (score1 > score2) {
-        winnerDisplay.textContent = "L'Humain a Gagné !";
+        winnerDisplay.textContent = "L'Humain à Gagné !";
     } else if (score2 > score1) {
-        winnerDisplay.textContent = "L'IA a Gagné !";
+        winnerDisplay.textContent = "L'IA à gagnée !";
     } else {
-        winnerDisplay.textContent = 'Égalité';
+        winnerDisplay.textContent = 'égalitée';
     }
     winnerDisplay.style.display = 'block';
-}
-
-function initEventListeners() {
-    aiPaddle.addEventListener('click', () => {
-        window.location.href = 'https://chat-jai-pete.fr/';
-    });
 }
 
 function initializeGame() {
@@ -186,7 +129,6 @@ function initializeGame() {
 }
 
 initializeGame();
-initEventListeners();
 gameLoop();
 
 document.addEventListener('mousemove', function(e) {

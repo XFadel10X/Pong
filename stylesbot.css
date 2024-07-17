@@ -1,5 +1,6 @@
 /* stylesbot.css */
 
+/* Styles généraux */
 body {
   margin: 0;
   height: 100vh;
@@ -108,27 +109,9 @@ body {
   background-color: #575757;
 }
 
-.slider {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 30px;
-}
+/* Styles spécifiques aux appareils mobiles */
 
-#slider-line {
-  position: relative;
-  width: 100%;
-  height: 10px;
-  background-color: #ddd;
-}
+  .slider-container-mobile input {
+      width: 100%;
 
-#slider-thumb {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: #333;
-  border-radius: 50%;
-  top: -5px;
-}
+  }
