@@ -33,11 +33,22 @@ paddleSliderMobile.addEventListener('input', (e) => {
 });
 
 // Contrôle du paddle avec la souris sur ordinateur
-gameContainer.addEventListener('mousemove', function(e) {
-    if (e.clientY >= 0 && e.clientY <= gameContainer.clientHeight) {
-        const newTop = e.clientY - playerPaddle.clientHeight / 2;
-        playerPaddle.style.top = `${Math.max(0, Math.min(newTop, gameContainer.clientHeight - playerPaddle.clientHeight))}px`;
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    const playerPaddle = document.getElementById('player');
+    const aiPaddle = document.getElementById('ai');
+    const gameContainer = document.querySelector('.game-container');
+    
+    const playerPaddleHeight = playerPaddle.clientHeight;
+    const aiPaddleHeight = aiPaddle.clientHeight;
+    const gameContainerHeight = gameContainer.clientHeight;
+
+    gameContainer.addEventListener('mousemove', function(e) {
+        // Calcul de la nouvelle position verticale du paddle en fonction de la souris
+        const newTop = e.clientY - playerPaddleHeight / 2;
+
+        // Limitez le mouvement du paddle pour ne pas dépasser les bords du conteneur de jeu
+        playerPaddle.style.top = `${Math.max(0, Math.min(newTop, gameContainerHeight - playerPaddleHeight))}px`;
+    });
 });
 
 function moveAIPaddle() {

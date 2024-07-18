@@ -7,7 +7,6 @@ body {
     align-items: center;
     height: 100vh;
     flex-direction: column;
-    font-family: Arial, sans-serif;
 }
 
 #personal-counter, #global-counter {
@@ -15,14 +14,14 @@ body {
     top: 10px;
     right: 10px;
     font-size: 24px;
-    background-color: #424040;
+    background-color: #333;
     color: #fff;
     padding: 10px;
     border-radius: 5px;
 }
 
 #global-counter {
-    top: 50px; 
+    top: 50px; /* Positionne le deuxième compteur en dessous du premier */
 }
 
 #clickable-image {
@@ -30,7 +29,6 @@ body {
     width: 200px;
     height: auto;
 }
-
 .navbar {
     position: fixed;
     left: -200px;
@@ -41,25 +39,25 @@ body {
     overflow-x: hidden;
     transition: left 0.3s;
     padding-top: 60px;
-}
-
-.navbar ul {
+  }
+  
+  .navbar ul {
     list-style-type: none;
     padding: 0;
-}
-
-.navbar ul li {
+  }
+  
+  .navbar ul li {
     padding: 8px;
     text-align: center;
     border-bottom: 1px solid #555;
-}
-
-.navbar ul li a {
+  }
+  
+  .navbar ul li a {
     color: white;
     text-decoration: none;
     display: block;
-}
-
-.navbar ul li a:hover {
+  }
+  
+  .navbar ul li a:hover {
     background-color: #575757;
-}
+  }
