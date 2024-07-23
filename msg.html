@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong 1v1 (PvB)</title>
-    <link rel="stylesheet" href="stylesbot.css">
+    <title>Messagerie </title>
+    <link rel="stylesheet" href="stylesmsg.css">
     <link rel="apple-touch-icon" sizes="180x180" href="Icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="Icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="Icons/favicon-16x16.png">
@@ -14,18 +14,23 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 <body>
-
-    <div class="game-container">
-        <div class="paddle" id="player"></div>
-        <div class="paddle" id="ai" onclick="goToLive()"></div>
-        <div class="ball"></div>
-        <div id="score1" class="score">0</div>
-        <div id="score2" class="score">0</div>
-        <div id="timer" class="timer">1:30</div>
-        <div id="winner" class="winner"></div>
+    <div id="messaging-app">
+        <div id="user-id">
+            Votre ID : <span id="user-id-value"></span>
+        </div>
+        <div id="contacts">
+            <input type="text" id="contact-id" placeholder="ID du contact">
+            <button id="start-chat">Démarrer une discussion</button>
+        </div>
+        <div id="chat-window">
+            <div id="messages"></div>
+            <input type="text" id="message-input" placeholder="Tapez votre message...">
+            <button id="send-message">Envoyer</button>
+        </div>
     </div>
     <div class="navbar">
         <ul>
+
             <li><a href="index.html">Accueil</a></li>
             <li><a href="Pong.html">Pong 1v1</a></li>
             <li><a href="pongbot.html">Pong Bot</a></li>
@@ -34,13 +39,6 @@
             <li><a href="msg.html">Messagerie</a></li>
         </ul>
     </div>
-
-    <!-- Slider pour mobile -->
-    <div class="slider-container-mobile">
-        <input type="range" id="paddle-slider-mobile" min="0" max="100" value="50">
-    </div>
-
-
-    <script src="scriptbot.js"></script>
+    <script src="scriptmsg.js"></script>
 </body>
 </html>

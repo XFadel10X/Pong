@@ -1,0 +1,81 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+#messaging-app {
+    width: 400px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+#user-id {
+    margin-bottom: 10px;
+}
+
+#contacts, #chat-window {
+    margin-top: 20px;
+}
+
+#messages {
+    height: 200px;
+    border: 1px solid #ddd;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+#message-input {
+    width: 80%;
+}
+
+#send-message {
+    width: 18%;
+}
+.navbar {
+    position: fixed;
+    left: -200px;
+    top: 0;
+    width: 200px;
+    height: 100%;
+    background-color: #333;
+    overflow-x: hidden;
+    transition: left 0.3s;
+    padding-top: 60px;
+  }
+  
+  .navbar ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .navbar ul li {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #555;
+  }
+  
+  .navbar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .navbar ul li a:hover {
+    background-color: #575757;
+  }
+  
+  /* Styles spécifiques aux appareils mobiles */
+  
+    .slider-container-mobile input {
+        width: 100%;
+  
+    }
+  
