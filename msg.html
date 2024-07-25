@@ -33,14 +33,26 @@
         </div>
     </div>
     <div id="chat-container" style="display: none;">
-        <div class="chat-box" id="chat-box"></div>
-        <div class="message-form">
-            <input type="text" id="message-input" placeholder="Entrez votre message...">
-            <button id="send-button">Envoyer</button>
+        <div class="chat-history-container">
+            <div class="chat-history" id="chat-history">
+                <h3>Historique des Discussions</h3>
+                <ul id="chat-history-list"></ul>
+            </div>
         </div>
-        <div class="start-chat">
-            <input type="text" id="user-id-input" placeholder="Entrez l'ID d'utilisateur pour discuter">
-            <button id="start-chat-button">Commencer la discussion</button>
+        <div class="chat-content-container">
+            <div class="chat-box" id="chat-box"></div>
+            <div class="message-form">
+                <input type="text" id="message-input" placeholder="Entrez votre message...">
+                <button id="send-button">Envoyer</button>
+                <button id="reset-chat-button">Réinitialiser la Discussion</button>
+            </div>
+            <div class="start-chat">
+                <input type="text" id="user-id-input" placeholder="Entrez l'ID d'utilisateur pour discuter">
+                <button id="start-chat-button">Commencer la discussion</button>
+            </div>
+            <div class="user-id">
+                <p> <span id="user-id-display"></span></p>
+            </div>
         </div>
     </div>
     <div class="navbar">

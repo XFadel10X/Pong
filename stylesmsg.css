@@ -1,3 +1,4 @@
+/* stylesmsg.css */
 body {
   font-family: Arial, sans-serif;
   display: flex;
@@ -9,20 +10,14 @@ body {
 }
 
 #auth-container, #chat-container {
-  width: 400px;
-  max-width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: #fff;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
 }
 
-#login-container, #register-container {
-  display: flex;
+#auth-container {
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 #login-email-input, #login-password-input, #register-email-input, #register-password-input, #pseudo-input, #message-input, #user-id-input {
@@ -48,8 +43,21 @@ button:hover {
 
 .chat-container {
   display: flex;
+  width: 100%;
+}
+
+.chat-history-container {
+  width: 300px;
+  border-right: 1px solid #ddd;
+  background-color: #f4f4f4;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.chat-content-container {
+  flex: 1;
+  display: flex;
   flex-direction: column;
-  height: 500px;
 }
 
 .chat-box {
@@ -69,9 +77,29 @@ button:hover {
 .start-chat {
   margin-top: 10px;
 }
+
+.user-id {
+  margin-top: 10px;
+}
+
+.chat-history ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.chat-history ul li {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.chat-history ul li:hover {
+  background-color: #e1e1e1;
+}
+
 .navbar {
   position: fixed;
-  left: -200px;
+  right: 0;
   top: 0;
   width: 200px;
   height: 100%;
@@ -79,6 +107,9 @@ button:hover {
   overflow-x: hidden;
   transition: left 0.3s;
   padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
 }
 
 .navbar ul {
@@ -90,14 +121,18 @@ button:hover {
   padding: 8px;
   text-align: center;
   border-bottom: 1px solid #555;
+  cursor: pointer;
+}
+
+.navbar ul li:hover {
+  background-color: #575757;
 }
 
 .navbar ul li a {
-  color: white;
+  color: #fff;
   text-decoration: none;
-  display: block;
 }
 
 .navbar ul li a:hover {
-  background-color: #575757;
+  text-decoration: underline;
 }

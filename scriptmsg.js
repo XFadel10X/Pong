@@ -1,6 +1,6 @@
 import { auth, db } from './firebaseInit.js';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
-import { collection, addDoc, query, where, onSnapshot, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+import { collection, addDoc, query, where, onSnapshot, getDocs, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
 
 // Références DOM
 const authContainer = document.getElementById('auth-container');
@@ -19,8 +19,12 @@ const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const userIdInput = document.getElementById('user-id-input');
 const startChatButton = document.getElementById('start-chat-button');
+const chatHistoryList = document.getElementById('chat-history-list');
+const resetChatButton = document.getElementById('reset-chat-button');
+const userIdDisplay = document.getElementById('user-id-display');
 
 let currentChatId = null;
+let unsubscribe = null;
 
 // Connexion de l'utilisateur
 loginButton.addEventListener('click', async () => {
@@ -63,10 +67,12 @@ registerButton.addEventListener('click', async () => {
 });
 
 // État de l'authentification
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
     if (user) {
         authContainer.style.display = 'none';
-        chatContainer.style.display = 'block';
+        chatContainer.style.display = 'flex';
+        userIdDisplay.textContent = `Votre ID: ${user.uid}`;
+        await loadChatHistory();
         listenForMessages();
     } else {
         authContainer.style.display = 'block';
@@ -76,14 +82,26 @@ onAuthStateChanged(auth, user => {
 
 // Écouter les messages
 const listenForMessages = () => {
-    const messagesQuery = query(collection(db, 'messages'));
-    onSnapshot(messagesQuery, snapshot => {
-        chatBox.innerHTML = '';
-        snapshot.forEach(doc => {
-            const message = doc.data();
-            chatBox.innerHTML += `<p><strong>${message.sender}:</strong> ${message.text}</p>`;
+    if (unsubscribe) {
+        unsubscribe();  // Supprimez l'écouteur précédent
+    }
+    
+    if (currentChatId) {
+        const messagesQuery = query(collection(db, 'messages'), where('chatId', '==', currentChatId));
+        unsubscribe = onSnapshot(messagesQuery, async snapshot => {
+            chatBox.innerHTML = '';
+            for (const doc of snapshot.docs) {
+                const message = doc.data();
+                const senderPseudo = await getPseudo(message.sender);
+                chatBox.innerHTML += `
+                    <div>
+                        <p><strong>${senderPseudo}:</strong> ${message.text}</p>
+                        ${message.sender === auth.currentUser.email ? `<button onclick="deleteMessage('${doc.id}')">Supprimer</button>` : ''}
+                    </div>
+                `;
+            }
         });
-    });
+    }
 };
 
 // Envoyer un message
@@ -105,12 +123,75 @@ sendButton.addEventListener('click', async () => {
 });
 
 // Commencer une discussion
-startChatButton.addEventListener('click', () => {
+startChatButton.addEventListener('click', async () => {
     const userId = userIdInput.value.trim();
     if (userId) {
+        // Définir l'ID du chat actuel
         currentChatId = userId;
+        
+        // Envoyer un message de notification aux deux utilisateurs
+        await sendStartChatNotification(userId);
+
+        // Démarrer l'écoute des messages
+        await listenForMessages();
     }
 });
+
+// Charger l'historique des discussions
+const loadChatHistory = async () => {
+    const usersCollection = collection(db, 'users');
+    const q = query(usersCollection);
+    const querySnapshot = await getDocs(q);
+    chatHistoryList.innerHTML = '';
+    querySnapshot.forEach((doc) => {
+        chatHistoryList.innerHTML += `<li onclick="startChat('${doc.data().uid}')">${doc.data().pseudo}</li>`;
+    });
+};
+
+// Commencer une discussion
+window.startChat = async (chatId) => {
+    currentChatId = chatId;
+    await listenForMessages();
+};
+
+// Supprimer un message
+window.deleteMessage = async (messageId) => {
+    try {
+        await deleteDoc(doc(db, 'messages', messageId));
+    } catch (error) {
+        console.error('Erreur de suppression du message:', error);
+    }
+};
+
+// Réinitialiser la discussion
+resetChatButton.addEventListener('click', async () => {
+    if (currentChatId) {
+        const messagesQuery = query(collection(db, 'messages'), where('chatId', '==', currentChatId));
+        const querySnapshot = await getDocs(messagesQuery);
+        querySnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+    }
+});
+
+// Obtenir le pseudo d'un utilisateur
+const getPseudo = async (email) => {
+    try {
+        const usersCollection = collection(db, 'users');
+        const q = query(usersCollection, where('uid', '==', email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0];
+            return userDoc.data().pseudo;
+        }
+        return email;  // Retourner l'email en cas de problème
+    } catch (error) {
+        console.error('Erreur lors de la récupération du pseudo:', error);
+        return email;  // Retourner l'email en cas d'erreur
+    }
+};
+
+// Déplacement de la navbar
 document.addEventListener('mousemove', function(e) {
     const navbar = document.querySelector('.navbar');
     if (e.clientX < 200) {
@@ -119,3 +200,28 @@ document.addEventListener('mousemove', function(e) {
         navbar.style.left = '-200px';
     }
 });
+const sendStartChatNotification = async (otherUserId) => {
+    if (auth.currentUser) {
+        const currentUserEmail = auth.currentUser.email;
+        try {
+            // Envoyer un message à l'autre utilisateur
+            await addDoc(collection(db, 'messages'), {
+                text: 'La discussion a commencé !',
+                sender: currentUserEmail,
+                chatId: currentChatId,
+                timestamp: new Date()
+            });
+
+            // Envoyer un message à l'utilisateur courant
+            await addDoc(collection(db, 'messages'), {
+                text: 'La discussion a commencé !',
+                sender: otherUserId,
+                chatId: currentChatId,
+                timestamp: new Date()
+            });
+
+        } catch (error) {
+            console.error('Erreur d\'envoi du message de notification:', error);
+        }
+    }
+};
