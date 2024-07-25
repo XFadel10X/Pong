@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messagerie</title>
+    <link rel="stylesheet" href="/Css/stylesmsg.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="Icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="Icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="Icons/favicon-16x16.png">
+    <link rel="manifest" href="Icons/site.webmanifest">
+    <link rel="mask-icon" href="Icons/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+    <div id="auth-container">
+        <h2>Connexion / Inscription</h2>
+        <div>
+            <h3>Se Connecter</h3>
+            <input type="email" id="login-email-input" placeholder="Email">
+            <input type="password" id="login-password-input" placeholder="Mot de passe">
+            <button id="login-button">Se Connecter</button>
+            <p id="login-message"></p>
+        </div>
+        <div>
+            <h3>S'inscrire</h3>
+            <input type="email" id="register-email-input" placeholder="Email">
+            <input type="password" id="register-password-input" placeholder="Mot de passe">
+            <input type="text" id="pseudo-input" placeholder="Pseudo">
+            <button id="register-button">S'inscrire</button>
+            <p id="register-message"></p>
+        </div>
+    </div>
+    <div id="chat-container" style="display: none;">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="message-form">
+            <input type="text" id="message-input" placeholder="Entrez votre message...">
+            <button id="send-button">Envoyer</button>
+        </div>
+        <div class="start-chat">
+            <input type="text" id="user-id-input" placeholder="Entrez l'ID d'utilisateur pour discuter">
+            <button id="start-chat-button">Commencer la discussion</button>
+        </div>
+    </div>
+    <div class="navbar">
+        <ul>
+            <li><a href="/Html/index.html">Accueil</a></li>
+            <li><a href="/Html/Pong.html">Pong 1v1</a></li>
+            <li><a href="/Html/pongbot.html">Pong Bot</a></li>
+            <li><a href="/Html/Random.html">Random Mode (Alpha)</a></li>
+            <li><a href="/Html/clickerball.html">Clicker Ball</a></li>
+            <li><a href="/Html/msg.html">Messagerie (Alpha)</a></li>
+        </ul>
+    </div>
+    <script type="module" src="/JavaScript/firebaseInit.js"></script>
+    <script type="module" src="/JavaScript/scriptmsg.js"></script>
+</body>
+</html>
