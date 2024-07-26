@@ -1,5 +1,5 @@
 import { auth, db } from './firebaseInit.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
 import { collection, addDoc, query, where, onSnapshot, getDocs, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
 
 // Références DOM
@@ -22,6 +22,7 @@ const startChatButton = document.getElementById('start-chat-button');
 const chatHistoryList = document.getElementById('chat-history-list');
 const resetChatButton = document.getElementById('reset-chat-button');
 const userIdDisplay = document.getElementById('user-id-display');
+const logoutButton = document.getElementById('logout-button');
 
 let currentChatId = null;
 
@@ -42,7 +43,6 @@ loginButton.addEventListener('click', async () => {
 });
 
 // Inscription de l'utilisateur
-// Inscription de l'utilisateur
 registerButton.addEventListener('click', async () => {
     const email = registerEmailInput.value.trim();
     const password = registerPasswordInput.value.trim();
@@ -51,18 +51,12 @@ registerButton.addEventListener('click', async () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            console.log('Utilisateur créé:', user);
-
-            // Générer un ID unique pour l'utilisateur
-            const uniqueId = await generateUniqueId(pseudo);
-
+            const uniqueId = generateUniqueId(pseudo);
             await addDoc(collection(db, 'users'), {
                 uid: user.uid,
-                email: user.email,
                 pseudo: pseudo,
                 uniqueId: uniqueId
             });
-
             registerMessage.textContent = 'Inscription réussie. Veuillez vous connecter.';
         } catch (error) {
             console.error('Erreur d\'inscription:', error);
@@ -73,47 +67,13 @@ registerButton.addEventListener('click', async () => {
     }
 });
 
-
-// Générer un ID unique
-const generateUniqueId = async (pseudo) => {
-    let uniqueId;
-    let idExists = true;
-    while (idExists) {
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        uniqueId = `${pseudo}#${randomNum.toString().padStart(4, '0')}`;
-
-        // Vérifier si l'ID existe déjà dans Firestore
-        const usersCollection = collection(db, 'users');
-        const q = query(usersCollection, where('uniqueId', '==', uniqueId));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            idExists = false;
-        }
-    }
-    return uniqueId;
-};
-
-
-// État d'authentification de l'utilisateur
+// État de l'authentification
 onAuthStateChanged(auth, async user => {
     if (user) {
         authContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
-
-        // Obtenir le pseudo et l'ID unique de l'utilisateur
-        const usersCollection = collection(db, 'users');
-        const q = query(usersCollection, where('uid', '==', user.uid));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0];
-            const userData = userDoc.data();
-            userIdDisplay.textContent = `Votre ID: ${userData.uniqueId}`;
-        }
-
+        userIdDisplay.textContent = `Votre ID: ${await getUserUniqueId(user.uid)}`;
         await loadChatHistory();
-        listenForMessages();
     } else {
         authContainer.style.display = 'block';
         chatContainer.style.display = 'none';
@@ -132,26 +92,12 @@ const listenForMessages = () => {
                 chatBox.innerHTML += `
                     <div>
                         <p><strong>${senderPseudo}:</strong> ${message.text}</p>
-                        ${message.sender === auth.currentUser.uid ? `<button onclick="deleteMessage('${doc.id}')">Supprimer</button>` : ''}
+                        ${message.sender === auth.currentUser.email ? `<button onclick="deleteMessage('${doc.id}')">Supprimer</button>` : ''}
                     </div>
                 `;
             }
         });
     }
-};
-
-
-
-// Obtenir le pseudo d'un utilisateur
-const getPseudo = async (uid) => {
-    const usersCollection = collection(db, 'users');
-    const q = query(usersCollection, where('uid', '==', uid));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0];
-        return userDoc.data().uniqueId;
-    }
-    return uid;  // En cas d'erreur, retourne l'UID par défaut
 };
 
 // Envoyer un message
@@ -161,7 +107,7 @@ sendButton.addEventListener('click', async () => {
         try {
             await addDoc(collection(db, 'messages'), {
                 text: message,
-                sender: auth.currentUser.uid,
+                sender: auth.currentUser.email,
                 chatId: currentChatId,
                 timestamp: new Date()
             });
@@ -172,133 +118,153 @@ sendButton.addEventListener('click', async () => {
     }
 });
 
-// Charger l'historique des discussions
+// Commencer une discussion
+startChatButton.addEventListener('click', async () => {
+    const userId = userIdInput.value.trim();
+    if (userId) {
+        currentChatId = userId;
+        document.getElementById('message-form').style.display = 'flex';
+
+        // Envoyer un message de démarrage aux deux utilisateurs
+        try {
+            const senderEmail = auth.currentUser.email;
+            const receiverEmail = userId;
+
+            await addDoc(collection(db, 'messages'), {
+                text: 'La discussion a commencé!',
+                sender: senderEmail,
+                chatId: currentChatId,
+                timestamp: new Date()
+            });
+
+            await addDoc(collection(db, 'messages'), {
+                text: 'La discussion a commencé!',
+                sender: receiverEmail,
+                chatId: currentChatId,
+                timestamp: new Date()
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi du message de démarrage:', error);
+        }
+
+        await listenForMessages();
+    }
+});
+
+// Réinitialiser la discussion
+resetChatButton.addEventListener('click', () => {
+    chatBox.innerHTML = '';
+    messageInput.value = '';
+});
+
+// Supprimer un message
+const deleteMessage = async (messageId) => {
+    try {
+        await deleteDoc(doc(db, 'messages', messageId));
+    } catch (error) {
+        console.error('Erreur lors de la suppression du message:', error);
+    }
+};
+
+// Supprimer une personne de l'historique
+window.removeFromHistory = async (uniqueId) => {
+    try {
+        const usersCollection = collection(db, 'users');
+        const q = query(usersCollection, where('uniqueId', '==', uniqueId));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0];
+            const userData = userDoc.data();
+
+            const messagesQuery = query(collection(db, 'messages'), where('chatId', '==', userData.uid));
+            const messagesSnapshot = await getDocs(messagesQuery);
+            messagesSnapshot.forEach(async (doc) => {
+                await deleteDoc(doc.ref);
+            });
+
+            const listItem = document.getElementById(`user-${uniqueId}`);
+            if (listItem) {
+                listItem.remove();
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors de la suppression de l\'historique:', error);
+    }
+};
+
 // Charger l'historique des discussions
 const loadChatHistory = async () => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-        const userChatsCollection = collection(db, 'userChats', currentUser.uid, 'chats');
-        const querySnapshot = await getDocs(userChatsCollection);
-        chatHistoryList.innerHTML = '';
-        querySnapshot.forEach((doc) => {
-            const chatData = doc.data();
+    const usersCollection = collection(db, 'users');
+    const q = query(usersCollection);
+    const querySnapshot = await getDocs(q);
+    chatHistoryList.innerHTML = '';
+    const seenUsers = new Set();
+    let hasHistory = false; // Variable pour vérifier si l'historique est non vide
+
+    querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        if (!seenUsers.has(userData.uid) && userData.uid !== auth.currentUser.uid) {
             chatHistoryList.innerHTML += `
-                <li data-chat-id="${doc.id}">
-                    ${chatData.pseudo}
-                    <button onclick="deleteChatHistory('${doc.id}')">Supprimer</button>
-                </li>`;
-        });
-    }
-};
-
-// Supprimer une discussion de l'historique de l'utilisateur
-window.deleteChatHistory = async (chatId) => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-        const chatDocRef = doc(db, 'userChats', currentUser.uid, 'chats', chatId);
-        await deleteDoc(chatDocRef);
-        await loadChatHistory();
-    }
-};
-
-// Sauvegarder une discussion dans l'historique de l'utilisateur
-const saveChatToHistory = async (chatId, pseudo) => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-        await addDoc(collection(db, 'userChats', currentUser.uid, 'chats'), {
-            chatId: chatId,
-            pseudo: pseudo
-        });
-    }
-};
-
-// Commencer une discussion
-startChatButton.addEventListener('click', async () => {
-    const userId = userIdInput.value.trim();
-    if (userId) {
-        currentChatId = userId;
-        const pseudo = await getPseudo(userId);
-        await saveChatToHistory(userId, pseudo);
-        await listenForMessages();
-    }
-});
-
-// Fonction pour envoyer un message de notification aux deux utilisateurs
-const sendStartChatNotification = async (otherUserId) => {
-    if (auth.currentUser) {
-        const currentUserUid = auth.currentUser.uid;
-        try {
-            // Envoyer un message à l'autre utilisateur
-            await addDoc(collection(db, 'messages'), {
-                text: 'La discussion a commencé !',
-                sender: currentUserUid,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
-
-            // Envoyer un message à l'utilisateur courant
-            await addDoc(collection(db, 'messages'), {
-                text: 'La discussion a commencé !',
-                sender: otherUserId,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
-
-        } catch (error) {
-            console.error('Erreur d\'envoi du message de notification:', error);
+                <li id="user-${userData.uniqueId}">
+                    ${userData.pseudo}
+                    <button onclick="removeFromHistory('${userData.uniqueId}')">Supprimer</button>
+                </li>
+            `;
+            seenUsers.add(userData.uid);
+            hasHistory = true;
         }
+    });
+
+    // Afficher ou masquer le formulaire de message en fonction de l'historique
+    if (hasHistory) {
+        document.getElementById('message-form').style.display = 'none';
+    } else {
+        document.getElementById('message-form').style.display = 'none';
     }
 };
 
-// Réinitialiser la conversation
-resetChatButton.addEventListener('click', () => {
-    currentChatId = null;
-    chatBox.innerHTML = '';
-});
-
-
-// Supprimer une discussion de l'historique de l'utilisateur
-window.deleteChatHistory = async (chatId) => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-        const chatDocRef = doc(db, 'userChats', currentUser.uid, 'chats', chatId);
-        await deleteDoc(chatDocRef);
-        await loadChatHistory();
+// Obtenir le pseudo d'un utilisateur
+const getPseudo = async (email) => {
+    const usersCollection = collection(db, 'users');
+    const q = query(usersCollection, where('uid', '==', email));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].data().pseudo;
     }
+    return email;
 };
 
-// Sauvegarder une discussion dans l'historique de l'utilisateur
+// Générer un ID unique pour l'utilisateur
+const generateUniqueId = (pseudo) => {
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `${pseudo}#${randomNum.toString().padStart(4, '0')}`;
+};
 
-
-// Commencer une discussion
-startChatButton.addEventListener('click', async () => {
-    const userId = userIdInput.value.trim();
-    if (userId) {
-        currentChatId = userId;
-        const pseudo = await getPseudo(userId);
-        await saveChatToHistory(userId, pseudo);
-        await listenForMessages();
+// Obtenir l'ID unique d'un utilisateur
+const getUserUniqueId = async (userId) => {
+    const usersCollection = collection(db, 'users');
+    const q = query(usersCollection, where('uid', '==', userId));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].data().uniqueId;
     }
-});
+    return 'ID inconnu';
+};
 
-// Fonction pour envoyer un message de notification aux deux utilisateurs
-
-// Réinitialiser la conversation
-resetChatButton.addEventListener('click', () => {
-    currentChatId = null;
-    chatBox.innerHTML = '';
+// Déconnexion de l'utilisateur
+logoutButton.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error('Erreur de déconnexion:', error);
+    }
 });
 document.addEventListener('mousemove', function(e) {
     const navbar = document.querySelector('.navbar');
-    if (e.clientX < 100) {
+    if (e.clientX < 70) {
         navbar.style.left = '0';
     } else {
         navbar.style.left = '-200px';
     }
 });
-
-
-
-
-
-

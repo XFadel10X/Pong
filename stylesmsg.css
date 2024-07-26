@@ -136,3 +136,9 @@ button:hover {
 .navbar ul li a:hover {
   text-decoration: underline;
 }
+.logout-container {
+  margin-top: auto; /* Pousse le bouton en bas du conteneur */
+  padding: 10px px;
+  text-align: center;
+
+}
