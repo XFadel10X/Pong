@@ -74,6 +74,7 @@ onAuthStateChanged(auth, async user => {
         chatContainer.style.display = 'flex';
         userIdDisplay.textContent = `Votre ID: ${await getUserUniqueId(user.uid)}`;
         await loadChatHistory();
+        listenForMessages(); // Démarrer l'écoute des messages
     } else {
         authContainer.style.display = 'block';
         chatContainer.style.display = 'none';
@@ -82,22 +83,25 @@ onAuthStateChanged(auth, async user => {
 
 // Écouter les messages
 const listenForMessages = () => {
-    if (currentChatId) {
-        const messagesQuery = query(collection(db, 'messages'), where('chatId', '==', currentChatId));
-        onSnapshot(messagesQuery, async snapshot => {
-            chatBox.innerHTML = '';
-            for (const doc of snapshot.docs) {
-                const message = doc.data();
-                const senderPseudo = await getPseudo(message.sender);
-                chatBox.innerHTML += `
-                    <div>
-                        <p><strong>${senderPseudo}:</strong> ${message.text}</p>
-                        ${message.sender === auth.currentUser.email ? `<button onclick="deleteMessage('${doc.id}')">Supprimer</button>` : ''}
-                    </div>
-                `;
-            }
-        });
-    }
+    const messagesQuery = query(collection(db, 'messages'), where('chatId', 'in', [currentChatId]));
+    onSnapshot(messagesQuery, async snapshot => {
+        chatBox.innerHTML = '';
+        for (const doc of snapshot.docs) {
+            const message = doc.data();
+            const senderPseudo = await getPseudo(message.sender);
+            chatBox.innerHTML += `
+                <div>
+                    <p><strong>${senderPseudo}:</strong> ${message.text}</p>
+                    ${message.sender === auth.currentUser.email ? `<button onclick="deleteMessage('${doc.id}')">Supprimer</button>` : ''}
+                </div>
+            `;
+        }
+
+        // Ouvrir la discussion et afficher les éléments nécessaires
+        if (currentChatId) {
+            document.getElementById('message-form').style.display = 'flex';
+        }
+    });
 };
 
 // Envoyer un message
@@ -123,7 +127,7 @@ startChatButton.addEventListener('click', async () => {
     const userId = userIdInput.value.trim();
     if (userId) {
         currentChatId = userId;
-        document.getElementById('message-form').style.display = 'flex';
+        updateUIForChatState();
 
         // Envoyer un message de démarrage aux deux utilisateurs
         try {
@@ -143,11 +147,11 @@ startChatButton.addEventListener('click', async () => {
                 chatId: currentChatId,
                 timestamp: new Date()
             });
-        } catch (error) {
-            console.error('Erreur lors de l\'envoi du message de démarrage:', error);
-        }
 
-        await listenForMessages();
+            await listenForMessages();
+        } catch (error) {
+            console.error('Erreur lors du démarrage de la discussion:', error);
+        }
     }
 });
 
@@ -155,6 +159,8 @@ startChatButton.addEventListener('click', async () => {
 resetChatButton.addEventListener('click', () => {
     chatBox.innerHTML = '';
     messageInput.value = '';
+    currentChatId = null;
+    updateUIForChatState();
 });
 
 // Supprimer un message
@@ -260,6 +266,8 @@ logoutButton.addEventListener('click', async () => {
         console.error('Erreur de déconnexion:', error);
     }
 });
+
+// Affichage de la navbar selon la position de la souris
 document.addEventListener('mousemove', function(e) {
     const navbar = document.querySelector('.navbar');
     if (e.clientX < 70) {
@@ -268,3 +276,72 @@ document.addEventListener('mousemove', function(e) {
         navbar.style.left = '-200px';
     }
 });
+document.getElementById('new-chat-button').addEventListener('click', () => {
+    document.getElementById('new-chat-popup').style.display = 'block';
+});
+
+// Commencer une nouvelle discussion
+document.getElementById('start-new-chat-button').addEventListener('click', async () => {
+    const userId = document.getElementById('new-chat-id-input').value.trim();
+    if (userId) {
+        currentChatId = userId;
+        document.getElementById('message-form').style.display = 'flex';
+
+        try {
+            const senderEmail = auth.currentUser.email;
+            const receiverEmail = userId;
+
+            await addDoc(collection(db, 'messages'), {
+                text: 'La discussion a commencé!',
+                sender: senderEmail,
+                chatId: currentChatId,
+                timestamp: new Date()
+            });
+
+            await addDoc(collection(db, 'messages'), {
+                text: 'La discussion a commencé!',
+                sender: receiverEmail,
+                chatId: currentChatId,
+                timestamp: new Date()
+            });
+
+            await listenForMessages();
+            document.getElementById('new-chat-popup').style.display = 'none';
+        } catch (error) {
+            console.error('Erreur lors du démarrage de la discussion:', error);
+        }
+    }
+});
+
+// Annuler la nouvelle discussion
+document.getElementById('cancel-new-chat-button').addEventListener('click', () => {
+    document.getElementById('new-chat-popup').style.display = 'none';
+});
+
+// Commencer une discussion à partir de l'historique
+window.startChat = async (uniqueId) => {
+    try {
+        const usersCollection = collection(db, 'users');
+        const q = query(usersCollection, where('uniqueId', '==', uniqueId));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0];
+            currentChatId = userDoc.data().uid;
+            updateUIForChatState();
+            await listenForMessages();
+        }
+    } catch (error) {
+        console.error('Erreur lors du démarrage de la discussion:', error);
+    }
+};
+
+const updateUIForChatState = () => {
+    const isInChat = !!currentChatId;
+
+    // Cacher ou afficher les éléments en fonction de l'état de la discussion
+    document.getElementById('user-id-input').style.display = isInChat ? 'none' : 'block';
+    document.getElementById('start-chat-button').style.display = isInChat ? 'none' : 'block';
+    document.getElementById('message-form').style.display = isInChat ? 'flex' : 'none';
+    document.getElementById('chat-history').style.display = isInChat ? 'block' : 'block'; // Ajustez si nécessaire
+};
