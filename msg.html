@@ -32,8 +32,10 @@
             <p id="register-message"></p>
         </div>
     </div>
+    
     <div id="chat-container" style="display: none;">
         <div class="chat-history-container">
+            <button id="new-chat-button">Nouvelle Discussion</button>
             <div class="chat-history" id="chat-history">
                 <h3>Historique des Discussions</h3>
                 <ul id="chat-history-list"></ul>
@@ -58,6 +60,7 @@
             <button id="logout-button">Déconnexion</button>
         </div>
     </div>
+    
     <div id="new-chat-popup" style="display: none;">
         <div class="popup-content">
             <h3>Commencer une nouvelle discussion</h3>
@@ -66,7 +69,7 @@
             <button id="cancel-new-chat-button">Annuler</button>
         </div>
     </div>
-    <button id="new-chat-button" style="display: none;">Nouvelle Discussion</button>
+    
     <div class="navbar">
         <ul>
             <li><a href="index.html">Accueil</a></li>
@@ -77,6 +80,7 @@
             <li><a href="msg.html">Messagerie (Alpha)</a></li>
         </ul>
     </div>
+
     <script type="module" src="firebaseInit.js"></script>
     <script type="module" src="scriptmsg.js"></script>
 </body>

@@ -31,14 +31,14 @@ body {
 button {
   padding: 10px 20px;
   border: none;
-  background-color: #007bff;
+  background-color: #2f3336;
   color: #fff;
   border-radius: 5px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #404850;
 }
 
 .chat-container {
@@ -50,8 +50,22 @@ button:hover {
   width: 300px;
   border-right: 1px solid #ddd;
   background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+}
+
+#new-chat-button {
+  background-color: #2f3336;
+  color: white;
   padding: 10px;
-  box-sizing: border-box;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .chat-content-container {
@@ -136,12 +150,13 @@ button:hover {
 .navbar ul li a:hover {
   text-decoration: underline;
 }
+
 .logout-container {
   margin-top: auto; /* Pousse le bouton en bas du conteneur */
   padding: 10px px;
   text-align: center;
-
 }
+
 #new-chat-popup {
   position: fixed;
   top: 50%;

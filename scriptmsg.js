@@ -1,347 +1,190 @@
 import { auth, db } from './firebaseInit.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
-import { collection, addDoc, query, where, onSnapshot, getDocs, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js';
+import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, updateDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js';
 
-// Références DOM
 const authContainer = document.getElementById('auth-container');
 const chatContainer = document.getElementById('chat-container');
-const loginEmailInput = document.getElementById('login-email-input');
-const loginPasswordInput = document.getElementById('login-password-input');
 const loginButton = document.getElementById('login-button');
-const loginMessage = document.getElementById('login-message');
-const registerEmailInput = document.getElementById('register-email-input');
-const registerPasswordInput = document.getElementById('register-password-input');
-const pseudoInput = document.getElementById('pseudo-input');
 const registerButton = document.getElementById('register-button');
-const registerMessage = document.getElementById('register-message');
-const chatBox = document.getElementById('chat-box');
+const logoutButton = document.getElementById('logout-button');
+const newChatButton = document.getElementById('new-chat-button');
+const startChatButton = document.getElementById('start-chat-button');
+const startNewChatButton = document.getElementById('start-new-chat-button');
+const resetChatButton = document.getElementById('reset-chat-button');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
-const userIdInput = document.getElementById('user-id-input');
-const startChatButton = document.getElementById('start-chat-button');
-const chatHistoryList = document.getElementById('chat-history-list');
-const resetChatButton = document.getElementById('reset-chat-button');
+const chatBox = document.getElementById('chat-box');
 const userIdDisplay = document.getElementById('user-id-display');
-const logoutButton = document.getElementById('logout-button');
+const chatHistoryList = document.getElementById('chat-history-list');
+const messageForm = document.getElementById('message-form');
+const startChatDiv = document.querySelector('.start-chat');
+const newChatPopup = document.getElementById('new-chat-popup');
+const cancelNewChatButton = document.getElementById('cancel-new-chat-button');
 
-let currentChatId = null;
+let currentUserId = null;
+let activeChatId = null;
+let unsubscribeChat = null;
 
-// Connexion de l'utilisateur
+// Fonction de connexion
 loginButton.addEventListener('click', async () => {
-    const email = loginEmailInput.value.trim();
-    const password = loginPasswordInput.value.trim();
-    if (email && password) {
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            console.error('Erreur de connexion:', error);
-            loginMessage.textContent = 'Erreur de connexion. Veuillez réessayer.';
-        }
-    } else {
-        loginMessage.textContent = 'Veuillez entrer un email et un mot de passe.';
-    }
-});
-
-// Inscription de l'utilisateur
-registerButton.addEventListener('click', async () => {
-    const email = registerEmailInput.value.trim();
-    const password = registerPasswordInput.value.trim();
-    const pseudo = pseudoInput.value.trim();
-    if (email && password && pseudo) {
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            const uniqueId = generateUniqueId(pseudo);
-            await addDoc(collection(db, 'users'), {
-                uid: user.uid,
-                pseudo: pseudo,
-                uniqueId: uniqueId
-            });
-            registerMessage.textContent = 'Inscription réussie. Veuillez vous connecter.';
-        } catch (error) {
-            console.error('Erreur d\'inscription:', error);
-            registerMessage.textContent = 'Erreur d\'inscription. Veuillez réessayer.';
-        }
-    } else {
-        registerMessage.textContent = 'Veuillez remplir tous les champs.';
-    }
-});
-
-// État de l'authentification
-onAuthStateChanged(auth, async user => {
-    if (user) {
+    const email = document.getElementById('login-email-input').value;
+    const password = document.getElementById('login-password-input').value;
+    
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('Connecté:', userCredential.user);
         authContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
-        userIdDisplay.textContent = `Votre ID: ${await getUserUniqueId(user.uid)}`;
-        await loadChatHistory();
-        listenForMessages(); // Démarrer l'écoute des messages
-    } else {
-        authContainer.style.display = 'block';
-        chatContainer.style.display = 'none';
+        currentUserId = userCredential.user.uid;
+        userIdDisplay.textContent = `Votre ID : ${currentUserId}`;
+        loadChatHistory(currentUserId);
+    } catch (error) {
+        console.error('Erreur de connexion:', error);
     }
 });
 
-// Écouter les messages
-const listenForMessages = () => {
-    const messagesQuery = query(collection(db, 'messages'), where('chatId', 'in', [currentChatId]));
-    onSnapshot(messagesQuery, async snapshot => {
-        chatBox.innerHTML = '';
-        for (const doc of snapshot.docs) {
-            const message = doc.data();
-            const senderPseudo = await getPseudo(message.sender);
-            chatBox.innerHTML += `
-                <div>
-                    <p><strong>${senderPseudo}:</strong> ${message.text}</p>
-                    ${message.sender === auth.currentUser.email ? `<button onclick="deleteMessage('${doc.id}')">Supprimer</button>` : ''}
-                </div>
-            `;
-        }
+// Fonction d'inscription
+registerButton.addEventListener('click', async () => {
+    const email = document.getElementById('register-email-input').value;
+    const password = document.getElementById('register-password-input').value;
+    const pseudo = document.getElementById('pseudo-input').value;
 
-        // Ouvrir la discussion et afficher les éléments nécessaires
-        if (currentChatId) {
-            document.getElementById('message-form').style.display = 'flex';
-        }
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log('Inscription réussie:', userCredential.user);
+        
+        // Enregistrement du pseudo dans Firestore
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+            pseudo: pseudo,
+            email: email
+        });
+        
+        authContainer.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        currentUserId = userCredential.user.uid;
+        userIdDisplay.textContent = `Votre ID : ${currentUserId}`;
+        loadChatHistory(currentUserId);
+    } catch (error) {
+        console.error('Erreur d\'inscription:', error);
+    }
+});
+
+// Fonction de déconnexion
+logoutButton.addEventListener('click', () => {
+    signOut(auth).then(() => {
+        console.log('Déconnecté');
+        authContainer.style.display = 'flex';
+        chatContainer.style.display = 'none';
+        currentUserId = null;
+        activeChatId = null;
+        if (unsubscribeChat) unsubscribeChat();
+    }).catch((error) => {
+        console.error('Erreur de déconnexion:', error);
     });
-};
+});
+
+// Fonction pour charger l'historique des discussions
+async function loadChatHistory(userId) {
+    chatHistoryList.innerHTML = ''; // Clear the list first
+
+    const userChatsSnapshot = await getDocs(collection(db, 'users', userId, 'chats'));
+    userChatsSnapshot.forEach(docSnapshot => {
+        const chatData = docSnapshot.data();
+        const listItem = document.createElement('li');
+        listItem.textContent = `Chat avec ${chatData.chatWith}`;
+        listItem.addEventListener('click', () => loadChat(docSnapshot.id));
+        chatHistoryList.appendChild(listItem);
+    });
+}
+
+// Fonction pour charger une discussion spécifique
+function loadChat(chatId) {
+    if (unsubscribeChat) unsubscribeChat();
+
+    activeChatId = chatId;
+    chatBox.innerHTML = '';
+    messageForm.style.display = 'flex';
+    startChatDiv.style.display = 'none';
+
+    const messagesCollection = collection(db, 'chats', chatId, 'messages');
+    unsubscribeChat = onSnapshot(messagesCollection, snapshot => {
+        snapshot.docChanges().forEach(change => {
+            if (change.type === 'added') {
+                const messageData = change.doc.data();
+                const messageElement = document.createElement('p');
+                messageElement.textContent = `${messageData.senderId}: ${messageData.text}`;
+                chatBox.appendChild(messageElement);
+            }
+        });
+    });
+}
 
 // Envoyer un message
 sendButton.addEventListener('click', async () => {
-    const message = messageInput.value.trim();
-    if (message && currentChatId) {
-        try {
-            await addDoc(collection(db, 'messages'), {
-                text: message,
-                sender: auth.currentUser.email,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
-            messageInput.value = '';
-        } catch (error) {
-            console.error('Erreur d\'envoi du message:', error);
-        }
+    const messageText = messageInput.value;
+    if (messageText && activeChatId) {
+        await addDoc(collection(db, 'chats', activeChatId, 'messages'), {
+            senderId: currentUserId,
+            text: messageText,
+            timestamp: new Date()
+        });
+        messageInput.value = '';
     }
 });
 
-// Commencer une discussion
-startChatButton.addEventListener('click', async () => {
-    const userId = userIdInput.value.trim();
-    if (userId) {
-        currentChatId = userId;
-        updateUIForChatState();
+// Démarrer une nouvelle discussion
+startNewChatButton.addEventListener('click', async () => {
+    const chatWithId = document.getElementById('new-chat-id-input').value;
+    if (chatWithId) {
+        const newChatDocRef = await addDoc(collection(db, 'chats'), {});
+        const newChatId = newChatDocRef.id;
 
-        // Envoyer un message de démarrage aux deux utilisateurs
-        try {
-            const senderEmail = auth.currentUser.email;
-            const receiverEmail = userId;
+        await setDoc(doc(db, 'users', currentUserId, 'chats', newChatId), {
+            chatWith: chatWithId
+        });
 
-            await addDoc(collection(db, 'messages'), {
-                text: 'La discussion a commencé!',
-                sender: senderEmail,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
+        await setDoc(doc(db, 'users', chatWithId, 'chats', newChatId), {
+            chatWith: currentUserId
+        });
 
-            await addDoc(collection(db, 'messages'), {
-                text: 'La discussion a commencé!',
-                sender: receiverEmail,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
-
-            await listenForMessages();
-        } catch (error) {
-            console.error('Erreur lors du démarrage de la discussion:', error);
-        }
+        await loadChatHistory(currentUserId);
+        newChatPopup.style.display = 'none';
     }
 });
 
-// Réinitialiser la discussion
-resetChatButton.addEventListener('click', () => {
-    chatBox.innerHTML = '';
-    messageInput.value = '';
-    currentChatId = null;
-    updateUIForChatState();
+// Réinitialiser une discussion (supprimer tous les messages)
+resetChatButton.addEventListener('click', async () => {
+    if (activeChatId) {
+        const messagesSnapshot = await getDocs(collection(db, 'chats', activeChatId, 'messages'));
+        messagesSnapshot.forEach(async docSnapshot => {
+            await deleteDoc(docSnapshot.ref);
+        });
+        chatBox.innerHTML = '';
+    }
 });
 
-// Supprimer un message
-const deleteMessage = async (messageId) => {
-    try {
-        await deleteDoc(doc(db, 'messages', messageId));
-    } catch (error) {
-        console.error('Erreur lors de la suppression du message:', error);
-    }
-};
+// Ouvrir la fenêtre pop-up pour une nouvelle discussion
+newChatButton.addEventListener('click', () => {
+    newChatPopup.style.display = 'block';
+});
 
-// Supprimer une personne de l'historique
-window.removeFromHistory = async (uniqueId) => {
-    try {
-        const usersCollection = collection(db, 'users');
-        const q = query(usersCollection, where('uniqueId', '==', uniqueId));
-        const querySnapshot = await getDocs(q);
+// Fermer la fenêtre pop-up pour une nouvelle discussion
+cancelNewChatButton.addEventListener('click', () => {
+    newChatPopup.style.display = 'none';
+});
 
-        if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0];
-            const userData = userDoc.data();
-
-            const messagesQuery = query(collection(db, 'messages'), where('chatId', '==', userData.uid));
-            const messagesSnapshot = await getDocs(messagesQuery);
-            messagesSnapshot.forEach(async (doc) => {
-                await deleteDoc(doc.ref);
-            });
-
-            const listItem = document.getElementById(`user-${uniqueId}`);
-            if (listItem) {
-                listItem.remove();
-            }
-        }
-    } catch (error) {
-        console.error('Erreur lors de la suppression de l\'historique:', error);
-    }
-};
-
-// Charger l'historique des discussions
-const loadChatHistory = async () => {
-    const usersCollection = collection(db, 'users');
-    const q = query(usersCollection);
-    const querySnapshot = await getDocs(q);
-    chatHistoryList.innerHTML = '';
-    const seenUsers = new Set();
-    let hasHistory = false; // Variable pour vérifier si l'historique est non vide
-
-    querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        if (!seenUsers.has(userData.uid) && userData.uid !== auth.currentUser.uid) {
-            chatHistoryList.innerHTML += `
-                <li id="user-${userData.uniqueId}">
-                    ${userData.pseudo}
-                    <button onclick="removeFromHistory('${userData.uniqueId}')">Supprimer</button>
-                </li>
-            `;
-            seenUsers.add(userData.uid);
-            hasHistory = true;
-        }
-    });
-
-    // Afficher ou masquer le formulaire de message en fonction de l'historique
-    if (hasHistory) {
-        document.getElementById('message-form').style.display = 'none';
+// État de l'authentification
+onAuthStateChanged(auth, user => {
+    if (user) {
+        console.log('Utilisateur connecté:', user);
+        authContainer.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        currentUserId = user.uid;
+        userIdDisplay.textContent = `Votre ID : ${currentUserId}`;
+        loadChatHistory(currentUserId);
     } else {
-        document.getElementById('message-form').style.display = 'none';
-    }
-};
-
-// Obtenir le pseudo d'un utilisateur
-const getPseudo = async (email) => {
-    const usersCollection = collection(db, 'users');
-    const q = query(usersCollection, where('uid', '==', email));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].data().pseudo;
-    }
-    return email;
-};
-
-// Générer un ID unique pour l'utilisateur
-const generateUniqueId = (pseudo) => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `${pseudo}#${randomNum.toString().padStart(4, '0')}`;
-};
-
-// Obtenir l'ID unique d'un utilisateur
-const getUserUniqueId = async (userId) => {
-    const usersCollection = collection(db, 'users');
-    const q = query(usersCollection, where('uid', '==', userId));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].data().uniqueId;
-    }
-    return 'ID inconnu';
-};
-
-// Déconnexion de l'utilisateur
-logoutButton.addEventListener('click', async () => {
-    try {
-        await signOut(auth);
-    } catch (error) {
-        console.error('Erreur de déconnexion:', error);
+        console.log('Aucun utilisateur connecté');
+        authContainer.style.display = 'flex';
+        chatContainer.style.display = 'none';
     }
 });
-
-// Affichage de la navbar selon la position de la souris
-document.addEventListener('mousemove', function(e) {
-    const navbar = document.querySelector('.navbar');
-    if (e.clientX < 70) {
-        navbar.style.left = '0';
-    } else {
-        navbar.style.left = '-200px';
-    }
-});
-document.getElementById('new-chat-button').addEventListener('click', () => {
-    document.getElementById('new-chat-popup').style.display = 'block';
-});
-
-// Commencer une nouvelle discussion
-document.getElementById('start-new-chat-button').addEventListener('click', async () => {
-    const userId = document.getElementById('new-chat-id-input').value.trim();
-    if (userId) {
-        currentChatId = userId;
-        document.getElementById('message-form').style.display = 'flex';
-
-        try {
-            const senderEmail = auth.currentUser.email;
-            const receiverEmail = userId;
-
-            await addDoc(collection(db, 'messages'), {
-                text: 'La discussion a commencé!',
-                sender: senderEmail,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
-
-            await addDoc(collection(db, 'messages'), {
-                text: 'La discussion a commencé!',
-                sender: receiverEmail,
-                chatId: currentChatId,
-                timestamp: new Date()
-            });
-
-            await listenForMessages();
-            document.getElementById('new-chat-popup').style.display = 'none';
-        } catch (error) {
-            console.error('Erreur lors du démarrage de la discussion:', error);
-        }
-    }
-});
-
-// Annuler la nouvelle discussion
-document.getElementById('cancel-new-chat-button').addEventListener('click', () => {
-    document.getElementById('new-chat-popup').style.display = 'none';
-});
-
-// Commencer une discussion à partir de l'historique
-window.startChat = async (uniqueId) => {
-    try {
-        const usersCollection = collection(db, 'users');
-        const q = query(usersCollection, where('uniqueId', '==', uniqueId));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0];
-            currentChatId = userDoc.data().uid;
-            updateUIForChatState();
-            await listenForMessages();
-        }
-    } catch (error) {
-        console.error('Erreur lors du démarrage de la discussion:', error);
-    }
-};
-
-const updateUIForChatState = () => {
-    const isInChat = !!currentChatId;
-
-    // Cacher ou afficher les éléments en fonction de l'état de la discussion
-    document.getElementById('user-id-input').style.display = isInChat ? 'none' : 'block';
-    document.getElementById('start-chat-button').style.display = isInChat ? 'none' : 'block';
-    document.getElementById('message-form').style.display = isInChat ? 'flex' : 'none';
-    document.getElementById('chat-history').style.display = isInChat ? 'block' : 'block'; // Ajustez si nécessaire
-};
